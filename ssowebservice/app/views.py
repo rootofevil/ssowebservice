@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 from app import app, login_manager
-from flask import render_template, flash, redirect, jsonify
+from flask import render_template, flash, redirect, jsonify, make_response
 from flask_login import login_required, current_user
 from user import User
 from config import log_path, log_level, zm_preauth_key, zm_preauth_url
@@ -15,7 +15,7 @@ logging.basicConfig(format = u'%(levelname)-8s [%(asctime)s] %(message)s', level
 def get_user(req):
     uid = req.environ.get('REMOTE_USER')
     user = User(uid)
-    logging.info('Login' + str(req.environ.get('REMOTE_USER_FULLNAME')))
+    #logging.info(req.environ.get('REMOTE_USER_FULLNAME'))
     user.set_attributes(samaccountname = req.environ.get('REMOTE_USER_SAMACCOUNTNAME'), 
                         fn = req.environ.get('REMOTE_USER_FULLNAME'),
                         givenname = req.environ.get('REMOTE_USER_GIVENNAME'),
@@ -57,7 +57,9 @@ def tomail():
         acct = current_user.mail
 
         pak = hmac.new(zm_preauth_key, '%s|name|0|%s'%(acct, timestamp), hashlib.sha1).hexdigest()
-        return redirect("%s?account=%s&expires=0&timestamp=%s&preauth=%s"%(zm_preauth_url, acct, timestamp, pak))
+        response = make_response(redirect("%s?account=%s&expires=0&timestamp=%s&preauth=%s"%(zm_preauth_url, acct, timestamp, pak)))
+        response.set_cookie(key = 'mail_auth', value = '1', max_age = 10)
+        return response
     except:
         pass
 
