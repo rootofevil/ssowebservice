@@ -20,6 +20,14 @@
     		</ul>
     		{% endif %}
     {% endwith %}
+	<p>
+	{{ user.get_id() }}
+    {{ user.fullname }}
+    {{ user.givenname }}
+    {{ user.sn }}
+    {{ user.mail }}
+    {{ user.samaccountname }}
+	</p>
     {% block content %}{% endblock %}
   </body>
 </html>

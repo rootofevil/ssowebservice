@@ -34,12 +34,19 @@ class User():
                 }
 
     def set_attributes(self, fn, samaccountname, mail, givenname, sn):
-        self.samaccountname = samaccountname.decode('utf8')
-        self.fullname = fn.decode('utf8')
-        self.mail = mail.decode('utf8')
-        self.givenname = givenname.decode('utf8')
-        self.sn = sn.decode('utf8')
+        self.samaccountname = self.decode_from_utf(samaccountname)
+        self.fullname = self.decode_from_utf(fn)
+        self.mail = self.decode_from_utf(mail)
+        self.givenname = self.decode_from_utf(givenname)
+        self.sn = self.decode_from_utf(sn)
         
+    def decode_from_utf(self, attr):
+        try:
+            decoded = attr.decode('utf8')
+        except AttributeError:
+            decoded = attr
+        return decoded
+     
     def debug(self, info):
         self.info = info
 

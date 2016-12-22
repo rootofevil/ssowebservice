@@ -1,0 +1,14 @@
+Flask==0.11.1
+Flask-Login==0.3.2
+Flask-OAuthlib==0.9.3
+Flask-SQLAlchemy==2.1
+Jinja2==2.8
+MarkupSafe==0.23
+SQLAlchemy==1.1.4
+Werkzeug==0.11.11
+click==6.6
+itsdangerous==0.24
+oauthlib==2.0.1
+requests==2.12.4
+requests-oauthlib==0.7.0
+wsgiref==0.1.2
