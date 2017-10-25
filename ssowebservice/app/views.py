@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*
 from app import app, login_manager
-from flask import render_template, flash, redirect, jsonify, make_response
+from flask import render_template, flash, redirect, jsonify, make_response, abort
 from flask_login import login_required, current_user
 from user import User
-from config import log_path, log_level, zm_preauth_key, zm_preauth_url
+from config import log_path, log_level, zm_preauth_key, zm_preauth_url, jwt_lifetime_hours, jwt_cookie_name, jwt_cookie_path, jwt_cookie_domain
 import logging
 
 from time import time
@@ -14,6 +14,9 @@ logging.basicConfig(format = u'%(levelname)-8s [%(asctime)s] %(message)s', level
 @login_manager.request_loader
 def get_user(req):
     uid = req.environ.get('REMOTE_USER')
+    if uid is None:
+        login_manager.login_message = 'User is not authenticated by HTTPD'
+        return None
     user = User(uid)
     #logging.info(req.environ.get('REMOTE_USER_FULLNAME'))
     user.set_attributes(samaccountname = req.environ.get('REMOTE_USER_SAMACCOUNTNAME'), 
@@ -28,14 +31,20 @@ def get_user(req):
 @app.route('/', methods = ['GET'])
 @login_required
 def home():
-    flash(current_user.get_id())
-    flash(current_user.fullname)
-    flash(current_user.givenname)
-    flash(current_user.sn)
-    flash(current_user.mail)
-    flash(current_user.samaccountname)
+    flash('uid: ' + current_user.get_id())
+    flash('fullname: ' + current_user.fullname)
+    flash('givenname: ' + current_user.givenname)
+    flash('sn: ' + current_user.sn)
+    flash('mail: ' + current_user.mail)
+    flash('sAMAccountname: ' + current_user.samaccountname)
+    flash('token: ' + str(current_user.get_auth_token()))
     logging.info(current_user.get_id())
-    return render_template('base.html')
+    if current_user is not None:
+        response = make_response(render_template('base.html'))
+        response.set_cookie(key = jwt_cookie_name, value = current_user.get_auth_token(), expires = jwt_lifetime_hours, path = jwt_cookie_path, domain = jwt_cookie_domain)
+        return response
+    else:
+        abort(403)
 
 @app.route('/get_user')
 @login_required
