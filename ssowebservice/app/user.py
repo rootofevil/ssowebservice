@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 import datetime, jwt, logging
-from config import jwt_lifetime_hours, private_key_path
+from config import jwt_lifetime_hours, private_key_path, jwt_algorithm
 class User():
     def __init__(self,id):
         self.id = id
@@ -54,7 +54,7 @@ class User():
         with open(private_key_path, 'r') as key:
             private_key = key.read()
             
-        algorithm = 'RS256'    
+        algorithm = jwt_algorithm    
         token = jwt.encode(payload, key=private_key, algorithm=algorithm)
         logging.debug(token)
         

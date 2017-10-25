@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 from app import app, login_manager
-from flask import render_template, flash, redirect, jsonify, make_response, abort, request
+from flask import render_template, flash, redirect, jsonify, make_response, abort, request, url_for
 from flask_login import login_required, current_user
 from user import User
 from config import log_path, log_level, zm_preauth_key, zm_preauth_url, jwt_lifetime_hours, jwt_cookie_name, jwt_cookie_path, jwt_cookie_domains, jwt_cookie_secure
@@ -39,9 +39,13 @@ def home():
         flash('mail: ' + current_user.mail)
         flash('sAMAccountname: ' + current_user.samaccountname)
         flash('token: ' + str(current_user.get_auth_token()))
-    logging.info(current_user.get_id())
+    logging.info('Logon from ' + current_user.get_id())
     if current_user is not None:
-        response = make_response(render_template('base.html'))
+        if request.args.get('url') is not None:
+            redirect_url = request.args.get('url')
+        else:
+            redirect_url = url_for('get_user')
+        response = make_response(redirect(redirect_url))
         expires = current_user.get_auth_token()['expires']
         token = current_user.get_auth_token()['token']
         for domain in jwt_cookie_domains:
@@ -55,9 +59,6 @@ def home():
 def get_user():
     return jsonify(current_user.get_attributes())
     
-@app.route('/login')
-def login():
-    return 'login'
 
 @app.route('/tomail')
 @login_required

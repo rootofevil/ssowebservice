@@ -5,6 +5,7 @@ log_path = 'logs/error.log'
 log_level = 'debug'
 
 jwt_lifetime_hours = 8
+jwt_algorithm = 'RS256'
 jwt_cookie_name = 'sso_token'
 jwt_cookie_path = '/'
 jwt_cookie_domains = ['.gssmp.local', '.03.perm.ru']
