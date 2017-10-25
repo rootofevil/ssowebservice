@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 import datetime, jwt, logging
-from config import jwt_lifetime_hours
+from config import jwt_lifetime_hours, private_key_path
 class User():
     def __init__(self,id):
         self.id = id
@@ -43,20 +43,22 @@ class User():
         self.sn = sn.decode('utf8')
         
     def get_auth_token(self):
+        now = datetime.datetime.utcnow()
+        expires = now + datetime.timedelta(hours=int(jwt_lifetime_hours))
         payload = {
-            'iat': datetime.datetime.utcnow(),
-            'nbf': datetime.datetime.utcnow(),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=int(jwt_lifetime_hours)),
+            'iat': now,
+            'nbf': now,
+            'exp': expires
         }
         payload.update(self.get_attributes())
-        with open('/opt/projects/ssowebservice/ssowebservice/private_key.pem', 'r') as key:
+        with open(private_key_path, 'r') as key:
             private_key = key.read()
             
         algorithm = 'RS256'    
         token = jwt.encode(payload, key=private_key, algorithm=algorithm)
         logging.debug(token)
         
-        return token
+        return {'token': token, 'expires': expires}
         
     def debug(self, info):
         self.info = info
